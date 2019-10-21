@@ -7,11 +7,12 @@ from wtforms import Form, StringField, validators
 from csv import reader
 import re
 from nltk.corpus import stopwords
+import time as tm
 # nltk.download('stopwords')
 
 app = Flask(__name__)
 
-NUM_DOC = 200
+NUM_DOC = 500
 INF = 2**32
 songNames = {}
 
