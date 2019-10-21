@@ -86,7 +86,7 @@ def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 		''' store the Total_Score of this particular document '''
 		tfIdfTable.append(l)
 
-	print("--- %s seconds to get tfidf table ---" % (tm.time() - start_time))
+	print("--- %s seconds to update tables tfidf ---" % (tm.time() - start_time))
 
 	return tfIdfTable
 
