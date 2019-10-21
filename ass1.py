@@ -67,7 +67,7 @@ def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 				l.append(0)
 
 		''' c = sqrt of ( sum of squares of weights) '''
-		c = sqrt(sum(map(lambda x: x*x, l)))
+		# c = sqrt(sum(map(lambda x: x*x, l)))
 
 		# if d == '18':
 		# 	print(songNames[str(18)])
@@ -267,7 +267,7 @@ def getResults(query):
 		else:
 			q.append(0)
 
-	c = sqrt(sum(map(lambda x: x*x, q)))
+	# c = sqrt(sum(map(lambda x: x*x, q)))
 	# print(str(c))
 	# for i in range(len(q)):
 	# 	q[i] = q[i]/c
