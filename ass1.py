@@ -21,6 +21,8 @@ songNames = {}
 def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 	'''returns the tf-idf tfIdfTable'''
 
+	start_time = tm.time()
+
 	# print(terms_docList)
 
 	''' keys is the list of document IDs '''
@@ -84,11 +86,14 @@ def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 		''' store the Total_Score of this particular document '''
 		tfIdfTable.append(l)
 
+	print("--- %s seconds to get tfidf table ---" % (tm.time() - start_time))
+
 	return tfIdfTable
 
 def readDataSet():
 	'''to read data from the dataset and load it into Data Structures'''
-	print("Reading and processing documents\n")
+	print("Reading and processing " + str(NUM_DOC) + " documents\n")
+
 	f = open('lyrics.csv', 'r', encoding = 'latin-1')
 	k = reader(f)
 
@@ -98,6 +103,9 @@ def readDataSet():
 	doc_stemmedTerms_Table = {}
 	stemmedterms = []
 	realTerms = []
+
+	start_time = tm.time()
+
 	for i in k:
 	    l += 1
 	    if l == 1:
@@ -135,9 +143,14 @@ def readDataSet():
 	    if l == NUM_DOC+1:
 	    	break
 
-	''' close file '''		
+	''' close file '''	
+
+	print("--- %s seconds for reading and altering data ---" % (tm.time() - start_time))	
 	f.close()
 	k = 0
+
+	start_time = tm.time()
+
 	invertedIndexTable = {}
 	
 	''' remove duplicate stemmed words (which are in the corpus) '''
@@ -162,16 +175,20 @@ def readDataSet():
 		''' make the postings list as a dictionary and update the inverted index table '''
 		invertedIndexTable[i] = dict(postingsList)
 
+	print("--- %s seconds to get inverted index ---" % (tm.time() - start_time))
+
 	# print(invertedIndexTable)
 	# print(doc_stemmedTerms_Table)
 
 	''' document vs tokens table is sorted according to the document ID '''
 	doc_stemmedTerms_Table = OrderedDict(doc_stemmedTerms_Table)
 
+
 	''' tfIdfTable is returned by the function update_tf_idfTable '''
 	tfIdfTable = update_tf_idfTable(doc_stemmedTerms_Table, invertedIndexTable)
 
 	''' return doc vs. tokens table & InvertedIndex Table & TfIdfTable & actual tokens in corpus'''
+
 	return doc_stemmedTerms_Table, invertedIndexTable, tfIdfTable, realTerms
 
 
@@ -222,6 +239,9 @@ def getTermWithSuffix(rterms, word):
 
 def getResults(query):
 	'''relevant documents for the query entered are returned'''
+
+	start_time = tm.time()
+
 	search = ''
 
 	''' removing stop words from the query '''
@@ -296,6 +316,9 @@ def getResults(query):
 
 		k += 1
 	results = sorted(ranks, key = lambda x: ranks[x], reverse = True)[:10]
+
+	print("--- %s seconds to retreive relevant documents ---" % (tm.time() - start_time))
+
 	return results,doc_IdtoName, search	
 
 
