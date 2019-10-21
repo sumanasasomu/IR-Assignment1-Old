@@ -14,8 +14,11 @@ app = Flask(__name__)
 NUM_DOC = 200
 INF = 2**32
 songNames = {}
+
+eightn = 0
+fiftfr = 0
 def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
-	'''returns the tf-idf tdIdfTable'''
+	'''returns the tf-idf tfIdfTable'''
 
 	# print(terms_docList)
 
@@ -26,7 +29,7 @@ def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 	N = len(doc_stemmedTerms_Table)
 
 	''' tfIdfTable is the table containing ''' 
-	tdIdfTable = []
+	tfIdfTable = []
 
 	''' for each document, i is the current Doc ID '''
 	for x in range(N):
@@ -52,6 +55,13 @@ def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 
 				l.append( ( 1 + log10(terms_docList[t][d]) ) * log10(N/n) )
 
+				# if d == '18' and t=='lone':
+				# 	eightn = ( 1 + log10(terms_docList[t][d]) ) * log10(N/n)
+				# 	print(str(terms_docList[t][d]) + " " +str(eightn))
+				# if d == '54' and t=='lone':
+				# 	fiftfr = ( 1 + log10(terms_docList[t][d]) ) * log10(N/n)
+				# 	print(str(terms_docList[t][d]) + " " +str(fiftfr))
+
 			else:
 
 				l.append(0)
@@ -59,15 +69,21 @@ def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 		''' c = sqrt of ( sum of squares of weights) '''
 		c = sqrt(sum(map(lambda x: x*x, l)))
 
+		# if d == '18':
+		# 	print(songNames[str(18)])
+		# 	print("c: "+str(c) + " " + str(eightn/c))
+		# if d == '54':
+		# 	print(songNames[str(54)])
+		# 	print("c: "+str(c) + " " + str(fiftfr/c))
+
 		''' for each term divide its score by sum_of_sqaures_of_scores'''
-		for i in range(len(l)):
-			l[i] = l[i]/c
+		# for i in range(len(l)):
+		# 	l[i] = l[i]/c
 
 		''' store the Total_Score of this particular document '''
-		tdIdfTable.append(l)
+		tfIdfTable.append(l)
 
-	# print(tdIdfTable)
-	return tdIdfTable
+	return tfIdfTable
 
 def readDataSet():
 	'''to read data from the dataset and load it into Data Structures'''
@@ -151,14 +167,14 @@ def readDataSet():
 	''' document vs tokens table is sorted according to the document ID '''
 	doc_stemmedTerms_Table = OrderedDict(doc_stemmedTerms_Table)
 
-	''' tdIdfTable is returned by the function update_tf_idfTable '''
-	tdIdfTable = update_tf_idfTable(doc_stemmedTerms_Table, invertedIndexTable)
+	''' tfIdfTable is returned by the function update_tf_idfTable '''
+	tfIdfTable = update_tf_idfTable(doc_stemmedTerms_Table, invertedIndexTable)
 
 	''' return doc vs. tokens table & InvertedIndex Table & TfIdfTable & actual tokens in corpus'''
-	return doc_stemmedTerms_Table, invertedIndexTable, tdIdfTable, realTerms
+	return doc_stemmedTerms_Table, invertedIndexTable, tfIdfTable, realTerms
 
 
-doc_stemmedTerms_Table, invertedIndexTable, tdIdfTable, real_terms = readDataSet()
+doc_stemmedTerms_Table, invertedIndexTable, tfIdfTable, real_terms = readDataSet()
 
 ''' N = no of documents '''
 N = len(doc_stemmedTerms_Table)
@@ -206,6 +222,8 @@ def getTermWithSuffix(rterms, word):
 def getResults(query):
 	'''relevant documents for the query entered are returned'''
 	search = ''
+
+	''' removing stop words from the query '''
 	stop_words = set(stopwords.words('english'))
 	word_tokens = word_tokenize(query)
 	filtered_query = ''
@@ -217,6 +235,7 @@ def getResults(query):
 	''' remove numbers and special charcaters'''
 	filtered_query = re.sub('[^A-Za-z\s]+', '', filtered_query)
 	query = filtered_query
+
 	for i in query.split(' '):
 		if PorterStemmer().stem(i) in invertedIndexTable:
 			search += i + ' '
@@ -231,6 +250,9 @@ def getResults(query):
 
 	search = search.strip()
 	queryTermsList = list(map(PorterStemmer().stem , word_tokenize(search)))
+	
+	print("raw search after changes = " + search)
+	print(queryTermsList)
 
 	''' form a vector for query '''
 	''' q is weights of all the terms in given query '''
@@ -241,18 +263,23 @@ def getResults(query):
 		tf = queryTermsList.count(i)
 		if tf>0:
 			q.append((1+log10(tf)) * log10((N+1)/(n+1)))
+			# print(str((1+log10(tf)) * log10((N+1)/(n+1))))
 		else:
 			q.append(0)
 
 	c = sqrt(sum(map(lambda x: x*x, q)))
-	for i in range(len(q)):
-		q[i] = q[i]/c
+	# print(str(c))
+	# for i in range(len(q)):
+	# 	q[i] = q[i]/c
 
 	def getDotProduct(a, b):
 		'''returns the dot product'''
 		su = 0
 		for i in range(len(a)):
 			su += a[i] * b[i]
+		modA = sqrt(sum(map(lambda x: x*x, a)))
+		modB = sqrt(sum(map(lambda x: x*x, b)))
+		su = su/(modA*modB)
 		return su
 
 	''' ranking of documents and return result '''
@@ -260,12 +287,14 @@ def getResults(query):
 	k = 0
 	doc_IdtoName = {}
 	documents_list = list(doc_stemmedTerms_Table.keys())
-	for j in tdIdfTable:
+	for j in tfIdfTable:
 		doc_IdtoName[documents_list[k]] = songNames[documents_list[k]]
+
+		''' store the scores for each doc and sort them in reverse order to display '''
 		ranks[documents_list[k]] = getDotProduct(j, q)
+
 		k += 1
 	results = sorted(ranks, key = lambda x: ranks[x], reverse = True)[:10]
-	print(results)
 	return results,doc_IdtoName, search	
 
 
