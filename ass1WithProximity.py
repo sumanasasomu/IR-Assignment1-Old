@@ -90,7 +90,9 @@ def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 
 	return tfIdfTable
 
-def positionIndex(filtered_sentence,pos_index,d,term):
+
+def positionIndex(filtered_sentence,d):
+	pos_index = {}
 
 	for pos, term in enumerate(filtered_sentence):
 		# stem the term.
@@ -114,7 +116,7 @@ def positionIndex(filtered_sentence,pos_index,d,term):
 			# Add doc ID to postings list.
 			pos_index[term][1][d] = [pos]
 		doclist.append(d)
-		
+
 def readDataSet():
 	'''to read data from the dataset and load it into Data Structures'''
 	print("Reading and processing " + str(NUM_DOC) + " documents\n")
