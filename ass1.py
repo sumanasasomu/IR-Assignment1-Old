@@ -15,8 +15,8 @@ NUM_DOC = 200
 INF = 2**32
 songNames = {}
 
-eightn = 0
-fiftfr = 0
+# eightn = 0
+# fiftfr = 0
 def update_tf_idfTable(doc_stemmedTerms_Table, terms_docList):
 	'''returns the tf-idf tfIdfTable'''
 
